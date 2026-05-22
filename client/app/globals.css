@@ -57,14 +57,6 @@ body {
     @apply bg-(--color-background) text-(--color-foreground) flex flex-col items-center;
 }
 
-p {
-    @apply font-serif leading-loose;
-}
-
-h1 {
-    @apply text-xl font-bold text-center inline-block py-8;
-}
-
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
