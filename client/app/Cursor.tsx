@@ -12,8 +12,17 @@ type Button = {
     borderRadius: number;
 };
 
+type Text = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    fontSize: number;
+};
+
 export function Cursor() {
     const buttons = useRef<Button[]>([]);
+    const texts = useRef<Text[]>([]);
 
     const target = useRef({
         x: 0,
@@ -49,11 +58,14 @@ export function Cursor() {
 
     useEffect(() => {
         const getElements = () => {
-            const elements = document.querySelectorAll(
+            const buttonElements = document.querySelectorAll(
                 '[data-cursor="button"]',
             );
+            const textElements = document.querySelectorAll(
+                '[data-cursor="text"]',
+            );
 
-            buttons.current = Array.from(elements).map((element) => {
+            buttons.current = Array.from(buttonElements).map((element) => {
                 const htmlElement = element as HTMLElement;
 
                 const rect = htmlElement.getBoundingClientRect();
@@ -70,6 +82,24 @@ export function Cursor() {
                     borderRadius: parseFloat(style.borderRadius),
 
                     isFilled: htmlElement.dataset.cursorFilled === "true",
+                };
+            });
+
+            texts.current = Array.from(textElements).map((element) => {
+                const htmlElement = element as HTMLElement;
+
+                const rect = htmlElement.getBoundingClientRect();
+
+                const style = window.getComputedStyle(htmlElement);
+
+                return {
+                    x: rect.left,
+                    y: rect.top,
+
+                    width: rect.width,
+                    height: rect.height,
+
+                    fontSize: parseFloat(style.fontSize),
                 };
             });
         };
@@ -103,15 +133,24 @@ export function Cursor() {
             const mouseY = e.clientY;
 
             const selectedButtons: Button[] = buttons.current.filter(
-                (button) => {
+                (element) => {
                     return (
-                        mouseX >= button.x &&
-                        mouseX <= button.x + button.width &&
-                        mouseY >= button.y &&
-                        mouseY <= button.y + button.height
+                        mouseX >= element.x &&
+                        mouseX <= element.x + element.width &&
+                        mouseY >= element.y &&
+                        mouseY <= element.y + element.height
                     );
                 },
             );
+
+            const selectedTexts: Text[] = texts.current.filter((element) => {
+                return (
+                    mouseX >= element.x &&
+                    mouseX <= element.x + element.width &&
+                    mouseY >= element.y &&
+                    mouseY <= element.y + element.height
+                );
+            });
 
             if (selectedButtons.length > 0) {
                 if (selectedButtons[0].isFilled) {
@@ -135,6 +174,16 @@ export function Cursor() {
                         borderRadius: selectedButtons[0].borderRadius,
                     };
                 }
+            } else if (selectedTexts.length > 0) {
+                target.current = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    width: 3,
+                    height: selectedTexts[0].fontSize + 10,
+                    weight: 2,
+                    opacity: 1,
+                    borderRadius: 12.5,
+                };
             } else {
                 target.current = {
                     x: e.clientX,
