@@ -31,7 +31,6 @@ export default function RootLayout({
             <body className="min-h-full flex flex-col">
                 {children}
                 <Cursor />
-                <button data-cursor="button">test</button>
             </body>
         </html>
     );

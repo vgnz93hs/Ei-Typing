@@ -8,7 +8,7 @@ type Button = {
     y: number;
     width: number;
     height: number;
-    isFixed: boolean;
+    isFilled: boolean;
     borderRadius: number;
 };
 
@@ -21,8 +21,11 @@ export function Cursor() {
         width: 25,
         height: 25,
         weight: 4,
+        opacity: 0,
+        borderRadius: 12.5,
     });
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
+    const isMouseDownRef = useRef(false);
 
     const springConfig = {
         stiffness: 1000,
@@ -35,6 +38,8 @@ export function Cursor() {
     const cursorW = useSpring(25, springConfig);
     const cursorH = useSpring(25, springConfig);
     const cursorWeight = useSpring(3, springConfig);
+    const cursorOpacity = useSpring(0, springConfig);
+    const cursorBorderRadius = useSpring(12.5, springConfig);
 
     const boxShadow = useTransform(
         cursorWeight,
@@ -64,28 +69,31 @@ export function Cursor() {
 
                     borderRadius: parseFloat(style.borderRadius),
 
-                    isFixed: style.position === "fixed",
+                    isFilled: htmlElement.dataset.cursorFilled === "true",
                 };
             });
         };
 
         window.addEventListener("mousedown", () => {
             setIsMouseDown(true);
+            isMouseDownRef.current = true;
         });
 
         window.addEventListener("mouseup", () => {
             setIsMouseDown(false);
+            isMouseDownRef.current = false;
         });
 
         getElements();
 
         window.addEventListener("resize", getElements);
         window.addEventListener("scroll", getElements);
+        window.addEventListener("mousedown", getElements);
 
         return () => {
             window.removeEventListener("resize", getElements);
-
             window.removeEventListener("scroll", getElements);
+            window.removeEventListener("mousedown", getElements);
         };
     }, []);
 
@@ -105,28 +113,61 @@ export function Cursor() {
                 },
             );
 
-            target.current = {
-                x: e.clientX,
-                y: e.clientY,
-                width: 25,
-                height: 25,
-                weight: selectedButtons.length == 0 ? 4 : 25,
-            };
+            if (selectedButtons.length > 0) {
+                if (selectedButtons[0].isFilled) {
+                    target.current = {
+                        x: selectedButtons[0].x + selectedButtons[0].width / 2,
+                        y: selectedButtons[0].y + selectedButtons[0].height / 2,
+                        width: selectedButtons[0].width + 16,
+                        height: selectedButtons[0].height + 16,
+                        weight: 4,
+                        opacity: 0.5,
+                        borderRadius: selectedButtons[0].borderRadius + 8,
+                    };
+                } else {
+                    target.current = {
+                        x: selectedButtons[0].x + selectedButtons[0].width / 2,
+                        y: selectedButtons[0].y + selectedButtons[0].height / 2,
+                        width: selectedButtons[0].width,
+                        height: selectedButtons[0].height,
+                        weight: 1000,
+                        opacity: 0.25,
+                        borderRadius: selectedButtons[0].borderRadius,
+                    };
+                }
+            } else {
+                target.current = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    width: 25,
+                    height: 25,
+                    weight: isMouseDownRef.current ? 8 : 4,
+                    opacity: 1,
+                    borderRadius: 12.5,
+                };
+            }
 
             cursorX.set(target.current.x - target.current.width / 2);
-
             cursorY.set(target.current.y - target.current.height / 2);
-
             cursorW.set(target.current.width);
             cursorH.set(target.current.height);
+            cursorOpacity.set(target.current.opacity);
 
             const minimumWeight =
                 Math.min(target.current.width, target.current.height) / 2;
 
             cursorWeight.set(Math.min(target.current.weight, minimumWeight));
+
+            cursorBorderRadius.set(
+                Math.min(target.current.borderRadius, minimumWeight),
+            );
         };
 
         window.addEventListener("mousemove", handleMouseMove);
+
+        window.addEventListener("mousedown", handleMouseMove);
+
+        window.addEventListener("mouseup", handleMouseMove);
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
@@ -145,11 +186,13 @@ export function Cursor() {
                 rounded-full
             `}
             style={{
+                opacity: cursorOpacity,
                 left: cursorX,
                 top: cursorY,
                 width: cursorW,
                 height: cursorH,
                 boxShadow,
+                borderRadius: cursorBorderRadius,
             }}
         />
     );
