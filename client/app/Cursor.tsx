@@ -1,31 +1,32 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { motion, useSpring, useTransform } from "framer-motion";
 
 export function Cursor() {
-    const [tergetPosition, setTergetPosition] = useState<{
-        x: number;
-        y: number;
-    }>({
-        x: 0,
-        y: 0,
-    });
-    const [tergetSize, setTergetSize] = useState<{ x: number; y: number }>({
-        x: 25,
-        y: 25,
-    });
-    const [position, setPosition] = useState<{ x: number; y: number }>({
-        x: 0,
-        y: 0,
-    });
-    const [size, setSize] = useState<{ x: number; y: number }>({
-        x: 25,
-        y: 25,
-    });
+    const [target, setTarget] = useState({ x: 0, y: 0, width: 25, height: 25 });
+
+    const springConfig = { stiffness: 150, damping: 20, mass: 1 };
+    const cursorX = useSpring(0, springConfig);
+    const cursorY = useSpring(0, springConfig);
+    const cursorW = useSpring(25, springConfig);
+    const cursorH = useSpring(25, springConfig);
+
+    useEffect(() => {
+        cursorX.set(target.x - target.width / 2);
+        cursorY.set(target.y - target.height / 2);
+        cursorW.set(target.width);
+        cursorH.set(target.height);
+    }, [target, cursorX, cursorY, cursorW, cursorH]);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            setPosition({ x: e.clientX, y: e.clientY });
+            setTarget({
+                x: e.clientX,
+                y: e.clientY,
+                width: 25,
+                height: 25,
+            });
         };
 
         window.addEventListener("mousemove", handleMouseMove);
@@ -36,16 +37,21 @@ export function Cursor() {
     }, []);
 
     return (
-        <div
-            className="fixed rounded-full pointer-events-none"
+        <motion.div
             style={{
-                left: `${position.x - size.x / 2}px`,
-                top: `${position.y - size.y / 2}px`,
-                width: `${size.x}px`,
-                height: `${size.y}px`,
+                position: "fixed",
+                left: 0,
+                top: 0,
+                x: cursorX,
+                y: cursorY,
+                width: cursorW,
+                height: cursorH,
+                pointerEvents: "none",
+                backgroundColor: "black",
+                borderRadius: "50%",
             }}
         >
             <div className="w-full h-full bg-white rounded-full" />
-        </div>
+        </motion.div>
     );
 }
