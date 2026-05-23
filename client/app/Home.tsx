@@ -24,13 +24,13 @@ export default function Home() {
                     Ei Typing
                 </h1>
                 <div
-                    className={`w-3 h-1 mb-1 ml-1 bg-(--color-foreground) ${!showCursor && "opacity-0"}`}
+                    className={`w-3 h-1 mb-1 ml-1 bg-cyan-600 ${!showCursor && "opacity-0"}`}
                 />
             </div>
 
             <button
                 data-cursor="button"
-                className="text-lg font-bold bg-(--color-foreground) w-32 justify-center py-2 rounded-md text-(--color-background) flex transition-all duration-200 ease-out active:scale-95 z-1000"
+                className="text-lg font-bold bg-cyan-600 w-32 justify-center py-2 rounded-md text-(--color-background) flex transition-all duration-200 ease-out active:scale-95"
                 data-cursor-shape="0"
                 onMouseEnter={() => {
                     setIsSelected(true);
