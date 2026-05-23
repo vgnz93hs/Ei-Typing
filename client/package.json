@@ -9,10 +9,13 @@
         "lint": "eslint"
     },
     "dependencies": {
+        "express": "^5.2.1",
         "framer-motion": "^12.40.0",
         "next": "16.2.6",
         "react": "19.2.4",
-        "react-dom": "19.2.4"
+        "react-dom": "19.2.4",
+        "socket.io": "^4.8.3",
+        "socket.io-client": "^4.8.3"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4",
