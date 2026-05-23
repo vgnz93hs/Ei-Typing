@@ -1,18 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Settings() {
+    const router = useRouter();
     const [serverUrl, setServerUrl] = useState<string>(() => {
         if (typeof window !== "undefined") {
             return localStorage.getItem("server-url") || "";
         }
         return "";
     });
+    const [displayName, setDisplayName] = useState<string>(() => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("display-name") || "";
+        }
+        return "";
+    });
 
-    const handleSave = (url: string) => {
-        setServerUrl(url);
-        localStorage.setItem("server-url", url);
+    const handleSave = (serverUrlInput: string, displayNameInput: string) => {
+        localStorage.setItem("server-url", serverUrlInput);
+        localStorage.setItem("display-name", displayNameInput);
     };
 
     return (
@@ -29,7 +37,7 @@ export default function Settings() {
                     data-cursor="text"
                     onChange={(e) => {
                         setServerUrl(e.target.value);
-                        handleSave(e.target.value);
+                        handleSave(e.target.value, displayName);
                     }}
                     className="outline-1"
                 />
@@ -39,12 +47,33 @@ export default function Settings() {
                     data-cursor-shape="2"
                     onClick={() => {
                         setServerUrl("");
-                        handleSave("");
+                        handleSave(serverUrl, displayName);
                     }}
                 >
                     Use Default
                 </button>
             </div>
+
+            <input
+                placeholder="Display Name"
+                type="text"
+                value={displayName}
+                data-cursor="text"
+                onChange={(e) => {
+                    setDisplayName(e.target.value);
+                    handleSave(serverUrl, e.target.value);
+                }}
+                className="outline-1"
+            />
+
+            <button
+                className="bg-cyan-600"
+                data-cursor="button"
+                data-cursor-shape="2"
+                onClick={() => router.push("/")}
+            >
+                Home
+            </button>
         </div>
     );
 }
