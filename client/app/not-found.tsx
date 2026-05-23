@@ -10,6 +10,10 @@ export default function Loading() {
         const intervalId = setInterval(() => {
             setShowCursor((prev) => !prev);
         }, 500);
+
+        return () => {
+            clearInterval(intervalId);
+        };
     }, []);
 
     return (
