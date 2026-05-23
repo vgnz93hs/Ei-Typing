@@ -8,7 +8,7 @@ type Button = {
     y: number;
     width: number;
     height: number;
-    isFilled: boolean;
+    shape: number;
     borderRadius: number;
 };
 
@@ -81,7 +81,7 @@ export function Cursor() {
 
                     borderRadius: parseFloat(style.borderRadius),
 
-                    isFilled: htmlElement.dataset.cursorFilled === "true",
+                    shape: Number(htmlElement.dataset.cursorShape ?? 0),
                 };
             });
 
@@ -153,7 +153,7 @@ export function Cursor() {
             });
 
             if (selectedButtons.length > 0) {
-                if (selectedButtons[0].isFilled) {
+                if (selectedButtons[0].shape == 0) {
                     target.current = {
                         x: selectedButtons[0].x + selectedButtons[0].width / 2,
                         y: selectedButtons[0].y + selectedButtons[0].height / 2,
@@ -163,7 +163,7 @@ export function Cursor() {
                         opacity: 0.5,
                         borderRadius: selectedButtons[0].borderRadius + 8,
                     };
-                } else {
+                } else if (selectedButtons[0].shape == 1) {
                     target.current = {
                         x: selectedButtons[0].x + selectedButtons[0].width / 2,
                         y: selectedButtons[0].y + selectedButtons[0].height / 2,
@@ -173,6 +173,16 @@ export function Cursor() {
                         opacity: 0.25,
                         borderRadius: selectedButtons[0].borderRadius,
                     };
+                } else if (selectedButtons[0].shape == 2) {
+                    target.current = {
+                        x: e.clientX,
+                        y: e.clientY,
+                        width: 25,
+                        height: 25,
+                        weight: isMouseDownRef.current ? 8 : 4,
+                        opacity: 1,
+                        borderRadius: 12.5,
+                    };
                 }
             } else if (selectedTexts.length > 0) {
                 target.current = {
@@ -181,18 +191,18 @@ export function Cursor() {
                     width: 3,
                     height: selectedTexts[0].fontSize + 10,
                     weight: 2,
-                    opacity: 1,
+                    opacity: 0.5,
                     borderRadius: 12.5,
                 };
             } else {
                 target.current = {
                     x: e.clientX,
                     y: e.clientY,
-                    width: 25,
-                    height: 25,
-                    weight: isMouseDownRef.current ? 8 : 4,
+                    width: 20,
+                    height: 20,
+                    weight: 10,
                     opacity: 1,
-                    borderRadius: 12.5,
+                    borderRadius: 10,
                 };
             }
 
@@ -202,8 +212,10 @@ export function Cursor() {
             cursorH.set(target.current.height);
             cursorOpacity.set(target.current.opacity);
 
-            const minimumWeight =
-                Math.min(target.current.width, target.current.height) / 2;
+            const minimumWeight = Math.min(
+                target.current.width,
+                target.current.height,
+            );
 
             cursorWeight.set(Math.min(target.current.weight, minimumWeight));
 
@@ -216,12 +228,14 @@ export function Cursor() {
 
         window.addEventListener("mousedown", handleMouseMove);
 
+        window.addEventListener("volumechange", () => handleMouseMove);
+
         window.addEventListener("mouseup", handleMouseMove);
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
         };
-    }, []);
+    });
 
     return (
         <motion.div
