@@ -285,12 +285,18 @@ export function Cursor() {
     }, [getElements, handleMouseMove]);
 
     useEffect(() => {
-        requestAnimationFrame(() => {
+        const observer = new MutationObserver(() => {
             getElements();
-
             handleMouseMove(mouse.current.x, mouse.current.y);
         });
-    }, [pathname, getElements, handleMouseMove]);
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+
+        return () => observer.disconnect();
+    }, [getElements, handleMouseMove]);
 
     return (
         <motion.div
