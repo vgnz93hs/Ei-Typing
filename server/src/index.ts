@@ -47,10 +47,12 @@ io.on("connection", (socket) => {
     });
 
     socket.on("joinRoom", (displayName: string) => {
-        const uuid: string = crypto.randomUUID();
-        room.push({ displayName: displayName, uuid: uuid })
+        if (room.length < 4) {
+            const uuid: string = crypto.randomUUID();
+            room.push({ displayName: displayName, uuid: uuid })
 
-        socket.emit("joined", uuid);
+            socket.emit("joined", uuid);
+        }
     });
 
     const watchedData = new Proxy(room, {

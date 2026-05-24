@@ -22,6 +22,7 @@ export default function Page() {
     const [isConnected, setIsConnected] = useState(false);
     const [room, setRoom] = useState<User[]>([]);
     const [uuid, setUuid] = useState("");
+    const [cameraAngle, setCameraAngle] = useState(1);
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -32,12 +33,14 @@ export default function Page() {
             socket.emit("fetch", "");
         }, 1000);
 
-        socket.on("connect", () => {
-            setIsConnected(true);
-        });
+        socket.on("connect", () => {});
 
         socket.on("roomInfo", (roomInfo) => {
+            setIsConnected(true);
             setRoom(roomInfo);
+            setCameraAngle(
+                roomInfo.length == 1 || roomInfo.length == 0 ? 3 : 1,
+            );
         });
 
         socket.on("joined", (myUuid) => {
@@ -57,7 +60,9 @@ export default function Page() {
 
     return (
         <div className="h-full w-full">
-            {isConnected && <Client room={room} />}
+            {isConnected && (
+                <Client uuid={uuid} room={room} cameraAngle={cameraAngle} />
+            )}
             <div
                 className={`bg-(--color-border) transition-opacity duration-200 ease-out ${uuid && "hidden"} w-full h-full fixed left-0 top-0 flex justify-center items-center`}
             >
