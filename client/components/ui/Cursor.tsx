@@ -268,8 +268,9 @@ export function Cursor() {
         window.addEventListener("mouseup", onMouseUp);
 
         window.addEventListener("resize", getElements);
-
         window.addEventListener("scroll", getElements);
+        window.addEventListener("animationend", getElements, true);
+        window.addEventListener("transitionend", getElements, true);
 
         return () => {
             window.removeEventListener("mousemove", onMouseMove);
@@ -279,7 +280,6 @@ export function Cursor() {
             window.removeEventListener("mouseup", onMouseUp);
 
             window.removeEventListener("resize", getElements);
-
             window.removeEventListener("scroll", getElements);
         };
     }, [getElements, handleMouseMove]);
