@@ -89,44 +89,56 @@ export default function Page() {
             </div>
             <div className={`w-2xl pr-4 py-4 h-full justify-end flex flex-col`}>
                 <div
-                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-out ${room.some((user) => user.uuid === uuid) ? "h-full" : isConnected ? "h-64" : "h-32"} rounded-2xl p-4 w-full`}
+                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${room.some((user) => user.uuid === uuid) ? "h-full" : isConnected ? "h-14" : "h-24"} rounded-2xl p-2 w-full`}
                 >
                     {isConnected ? (
-                        <div className="h-full w-full flex flex-col gap-8 justify-center items-center">
-                            <div
-                                className="font-mono font-bold text-lg"
-                                data-cursor="text"
-                            >
-                                Connected
-                            </div>
-                            <div className="flex flex-col gap-4">
+                        <div className="h-full w-full flex items-center">
+                            {room.length < 4 ? (
+                                <>
+                                    <div className="w-full">
+                                        <div
+                                            className="font-mono w-fit pl-4 font-bold"
+                                            data-cursor="text"
+                                        >
+                                            Connected
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div
+                                            className="rounded-lg w-32 flex"
+                                            data-cursor="button"
+                                            data-cursor-shape="1"
+                                        >
+                                            <button
+                                                className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                onClick={() => handleConnect()}
+                                            >
+                                                Watch Only
+                                            </button>
+                                        </div>
+                                        <div
+                                            className="rounded-lg w-24 flex"
+                                            data-cursor="button"
+                                            data-cursor-shape="0"
+                                        >
+                                            <button
+                                                disabled={room.length >= 4}
+                                                className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                onClick={() => handleConnect()}
+                                            >
+                                                Join
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
                                 <div
-                                    className="rounded-lg w-48 flex"
-                                    data-cursor="button"
-                                    data-cursor-shape="0"
+                                    className="font-mono opacity-50 w-fit pl-4 font-bold"
+                                    data-cursor="text"
                                 >
-                                    <button
-                                        data-cursor="button"
-                                        className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                        data-cursor-shape="0"
-                                        onClick={() => handleConnect()}
-                                    >
-                                        Join
-                                    </button>
+                                    This Room is Full
                                 </div>
-                                <div
-                                    className="rounded-lg w-48 flex"
-                                    data-cursor="button"
-                                    data-cursor-shape="1"
-                                >
-                                    <button
-                                        className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                        onClick={() => handleConnect()}
-                                    >
-                                        Watch Only
-                                    </button>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     ) : (
                         <div className="flex justify-center flex-col h-full items-center">

@@ -262,6 +262,7 @@ export function Cursor() {
         getElements();
 
         window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("animationend", getElements, true);
 
         window.addEventListener("mousedown", onMouseDown);
 
