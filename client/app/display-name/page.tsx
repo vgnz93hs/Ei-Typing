@@ -18,22 +18,14 @@ export default function Loading() {
 
     return (
         <main className="flex flex-col h-full items-center pt-16">
-            <h1 className="font-mono font-bold text-2xl" data-cursor="text">
-                404
-            </h1>
             <div className="flex items-end">
-                <h2
-                    className="font-mono font-bold mt-4 text-lg"
+                <h1
+                    className="font-mono font-bold text-2xl"
                     data-cursor="text"
-                >
-                    Not Found
-                </h2>
+                ></h1>
                 <div
                     className={`w-3 h-1 mb-1 ml-1 bg-cyan-600 ${!showCursor && "opacity-0"}`}
                 />
-                <button className="ml-4 px-4 py-2 bg-cyan-600 text-white">
-                    Go Home
-                </button>
             </div>
         </main>
     );

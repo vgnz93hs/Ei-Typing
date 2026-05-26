@@ -31,7 +31,10 @@ export default function RootLayout({
             <body className="min-h-full flex flex-col">
                 <main className="flex flex-col h-screen">
                     {children}
-                    <div data-cursor="text" className="text-xs opacity-25 mb-4">
+                    <div
+                        data-cursor="text"
+                        className="text-xs w-full text-center fixed left-0 opacity-25 bottom-4"
+                    >
                         © 2026 vgnz93hs. All rights reserved.
                     </div>
                 </main>
