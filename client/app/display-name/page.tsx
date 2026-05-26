@@ -31,9 +31,6 @@ export default function Loading() {
                 <div
                     className={`w-3 h-1 mb-1 ml-1 bg-cyan-600 ${!showCursor && "opacity-0"}`}
                 />
-                <button className="ml-4 px-4 py-2 bg-cyan-600 text-white">
-                    Go Home
-                </button>
             </div>
         </main>
     );
