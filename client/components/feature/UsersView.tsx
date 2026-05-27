@@ -38,7 +38,7 @@ export default function UsersView({
                     >
                         <div className="bg-(--color-foreground) w-full h-full flex rounded-full relative active:scale-95 transition-transform duration-200 ease-out">
                             <div
-                                className="absolute pointer-events-none rounded-full text-center text-sm pb-2 w-32 flex justify-center"
+                                className="absolute pointer-events-none rounded-full transition-all duration-500 ease-[cubic-bezier(0.1,0.5,0,1)] text-center text-sm pb-2 w-32 flex justify-center"
                                 style={{
                                     left: `calc(${positions[index].w / 2}px - 64px)`,
                                     bottom: `calc(${positions[index].h}px + 0px)`,

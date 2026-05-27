@@ -35,6 +35,7 @@ export default function Page() {
     });
     const socketRef = useRef<ReturnType<typeof io> | null>(null);
     const router = useRouter();
+    const [isSpectator, setIsSpectator] = useState<boolean>(false);
     const [userPositions, setUserPositions] = useState<Position[]>(
         Array.from({ length: 4 }, () => ({
             x: 0,
@@ -67,7 +68,16 @@ export default function Page() {
             );
             setUserPositions(
                 userPositions.map((position, index) => {
-                    if (index < roomInfo.length) {
+                    if (roomInfo.length == 1 && index == 0) {
+                        const angle = (index / roomInfo.length) * 2 * Math.PI;
+                        return {
+                            x: 0,
+                            y: 0,
+                            w: 64,
+                            h: 64,
+                            opacity: 1,
+                        };
+                    } else if (index < roomInfo.length) {
                         const angle = (index / roomInfo.length) * 2 * Math.PI;
                         return {
                             x: Math.cos(angle) * 50,
@@ -118,6 +128,10 @@ export default function Page() {
         socketRef.current?.emit("joinRoom", displayName);
     };
 
+    const handleWatch = () => {
+        setIsSpectator(true);
+    };
+
     return (
         <div className="flex w-full h-full">
             <div className="w-full flex">
@@ -125,10 +139,12 @@ export default function Page() {
             </div>
             <div className={`w-2xl pr-4 py-4 h-full justify-end flex flex-col`}>
                 <div
-                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${room.some((user) => user.userId === userId) ? "h-full" : isConnected ? "h-14" : "h-14"} rounded-2xl p-2 w-full`}
+                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${isSpectator ? "opacity-0 scale-95 h-14" : room.some((user) => user.userId === userId) ? "h-full" : isConnected ? "h-14" : "h-14"} rounded-2xl p-2 w-full`}
                 >
                     {isConnected ? (
-                        room.some((user) => user.userId === userId) ? (
+                        isSpectator ? (
+                            <div className="w-full h-full flex items-center"></div>
+                        ) : room.some((user) => user.userId === userId) ? (
                             <div className="flex flex-col h-full">
                                 <div className="flex h-full">
                                     {room.length < 4 ? (
@@ -184,7 +200,7 @@ export default function Page() {
                                                 <button
                                                     className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
                                                     onClick={() =>
-                                                        handleConnect()
+                                                        handleWatch()
                                                     }
                                                 >
                                                     Watch Only
