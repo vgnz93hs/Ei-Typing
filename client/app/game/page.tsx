@@ -59,11 +59,33 @@ export default function Page() {
 
         socket.on("connect", () => {});
 
-        socket.on("roomInfo", (roomInfo) => {
+        socket.on("roomInfo", (roomInfo: User[]) => {
             setIsConnected(true);
             setRoom(roomInfo);
             setCameraAngle(
                 roomInfo.length == 1 || roomInfo.length == 0 ? 3 : 1,
+            );
+            setUserPositions(
+                userPositions.map((position, index) => {
+                    if (index < roomInfo.length) {
+                        const angle = (index / roomInfo.length) * 2 * Math.PI;
+                        return {
+                            x: Math.cos(angle) * 50,
+                            y: Math.sin(angle) * 50,
+                            w: 24,
+                            h: 24,
+                            opacity: 1,
+                        };
+                    } else {
+                        return {
+                            x: 0,
+                            y: 0,
+                            w: 24,
+                            h: 24,
+                            opacity: 0,
+                        };
+                    }
+                }),
             );
         });
 
