@@ -11,7 +11,7 @@ import { join } from "node:path/win32";
 
 type User = {
     displayName: string;
-    uuid: string;
+    userId: string;
     pulse: string;
 };
 
@@ -27,7 +27,7 @@ export default function Page() {
     const [showCursor, setShowCursor] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [room, setRoom] = useState<User[]>([]);
-    const [uuid, setUuid] = useState("");
+    const [userId, setUserId] = useState("");
     const [cameraAngle, setCameraAngle] = useState(1);
     const [displayName, setDisplayName] = useState<string>(() => {
         if (typeof window === "undefined") return "";
@@ -68,7 +68,21 @@ export default function Page() {
         });
 
         socket.on("joined", (myUuid) => {
-            setUuid(myUuid);
+            setUserId(myUuid);
+        });
+
+        socket.on("pulse", (pulseUuid: string) => {
+            console.log(pulseUuid);
+
+            if (userId !== null) {
+                console.log("Sent pulse response📡:", pulseUuid);
+                socket.emit("pulseResponse", {
+                    userId: userId,
+                    newPulse: pulseUuid,
+                });
+            } else {
+                console.log("not connected");
+            }
         });
 
         return () => {
@@ -79,7 +93,7 @@ export default function Page() {
     }, [router]);
 
     const handleConnect = () => {
-        socketRef.current?.emit("joinRoom", "vgnz93s");
+        socketRef.current?.emit("joinRoom", displayName);
     };
 
     return (
@@ -89,61 +103,102 @@ export default function Page() {
             </div>
             <div className={`w-2xl pr-4 py-4 h-full justify-end flex flex-col`}>
                 <div
-                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${room.some((user) => user.uuid === uuid) ? "h-full" : isConnected ? "h-14" : "h-24"} rounded-2xl p-2 w-full`}
+                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${room.some((user) => user.userId === userId) ? "h-full" : isConnected ? "h-14" : "h-14"} rounded-2xl p-2 w-full`}
                 >
                     {isConnected ? (
-                        <div className="h-full w-full flex items-center">
-                            {room.length < 4 ? (
-                                <>
-                                    <div className="w-full">
+                        room.some((user) => user.userId === userId) ? (
+                            <div className="flex flex-col h-full">
+                                <div className="flex h-full">
+                                    {room.length < 4 ? (
                                         <div
-                                            className="font-mono w-fit pl-4 font-bold"
+                                            className="gradient-text font-bold px-2 py-1 flex"
                                             data-cursor="text"
                                         >
-                                            Connected
+                                            Waiting for other players…
                                         </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <div
-                                            className="rounded-lg w-32 flex"
-                                            data-cursor="button"
-                                            data-cursor-shape="1"
-                                        >
-                                            <button
-                                                className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                onClick={() => handleConnect()}
-                                            >
-                                                Watch Only
-                                            </button>
-                                        </div>
-                                        <div
-                                            className="rounded-lg w-24 flex"
-                                            data-cursor="button"
-                                            data-cursor-shape="0"
-                                        >
-                                            <button
-                                                disabled={room.length >= 4}
-                                                className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                onClick={() => handleConnect()}
-                                            >
-                                                Join
-                                            </button>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div
-                                    className="font-mono opacity-50 w-fit pl-4 font-bold"
-                                    data-cursor="text"
-                                >
-                                    This Room is Full
+                                    ) : (
+                                        <div></div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                                <div className="px-2 flex flex-col gap-2 pb-8">
+                                    {room.map((user) => (
+                                        <div
+                                            className="w-fit flex"
+                                            data-cursor="text"
+                                            key={user.userId}
+                                        >
+                                            {user.displayName}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="w-full px-2 py-1 flex gap-2 items-center">
+                                    <div
+                                        className="font-bold opacity-50 flex"
+                                        data-cursor="text"
+                                    >
+                                        Connected
+                                    </div>
+                                    <div className="flex w-4 h-4 bg-green-500 rounded-full"></div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="h-full w-full flex items-center">
+                                {room.length < 4 ? (
+                                    <>
+                                        <div className="w-full">
+                                            <div
+                                                className="w-fit pl-4 font-bold"
+                                                data-cursor="text"
+                                            >
+                                                Connected
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <div
+                                                className="rounded-lg w-32 flex"
+                                                data-cursor="button"
+                                                data-cursor-shape="1"
+                                            >
+                                                <button
+                                                    className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                    onClick={() =>
+                                                        handleConnect()
+                                                    }
+                                                >
+                                                    Watch Only
+                                                </button>
+                                            </div>
+                                            <div
+                                                className="rounded-lg w-24 flex"
+                                                data-cursor="button"
+                                                data-cursor-shape="0"
+                                            >
+                                                <button
+                                                    disabled={room.length >= 4}
+                                                    className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                    onClick={() =>
+                                                        handleConnect()
+                                                    }
+                                                >
+                                                    Join
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div
+                                        className="font-mono opacity-50 w-fit pl-4 font-bold"
+                                        data-cursor="text"
+                                    >
+                                        This Room is Full
+                                    </div>
+                                )}
+                            </div>
+                        )
                     ) : (
-                        <div className="flex justify-center flex-col h-full items-center">
+                        <div className="w-full h-full flex items-center">
                             <div
-                                className="font-mono font-bold text-lg gradient-text"
+                                className="w-fit pl-4 font-bold gradient-text"
                                 data-cursor="text"
                             >
                                 Connecting to Server…

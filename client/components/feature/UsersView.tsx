@@ -1,6 +1,6 @@
 type User = {
     displayName: string;
-    uuid: string;
+    userId: string;
     pulse: string;
 };
 
@@ -24,7 +24,7 @@ export default function UsersView({
             <div className="w-96 h-96 flex relative">
                 {users.map((user, index) => (
                     <div
-                        key={user.uuid}
+                        key={user.userId}
                         className="absolute flex"
                         style={{
                             opacity: 1,

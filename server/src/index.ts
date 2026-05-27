@@ -1,19 +1,18 @@
 import express from "express";
 import { createServer } from "http";
-import { randomUUID, UUID } from "crypto";
 import { Server } from "socket.io";
 
 type User = {
-    displayName: string,
-    uuid: string,
-    pulse?: string,
-}
+    displayName: string;
+    userId: string;
+    pulse?: string;
+};
 
 let room: User[] = [];
+let previousPulse: string = "";
 
 const app = express();
 const httpServer = createServer(app);
-
 const io = new Server(httpServer, {
     cors: {
         origin: "*",
@@ -21,46 +20,67 @@ const io = new Server(httpServer, {
     },
 });
 
+function updateRoom(fn: (room: User[]) => void) {
+    fn(room);
+    io.emit("roomInfo", room);
+}
+
+setInterval(() => {
+    updateRoom((r) => {
+        for (let i = r.length - 1; i >= 0; i--) {
+            if (r[i].pulse !== previousPulse) {
+                console.log("user kicked:", previousPulse, "!=", r[i].pulse);
+                r.splice(i, 1);
+            }
+        }
+    });
+
+    const sharedUUID = crypto.randomUUID();
+    io.emit("pulse", sharedUUID);
+    console.log("Pulse sent📡:", sharedUUID);
+    previousPulse = sharedUUID;
+}, 1000);
+
 io.on("connection", (socket) => {
-    // 接続元情報
     const ip = socket.handshake.address;
     const origin = socket.handshake.headers.origin;
     const userAgent = socket.handshake.headers["user-agent"];
+    let userId: string | null = null;
 
-    console.log("接続:", socket.id);
+    console.log("Connected👍:", socket.id);
     console.log("IP:", ip);
     console.log("Origin:", origin);
     console.log("UA:", userAgent);
 
-    socket.on("message", (msg: string) => {
-        console.log("受信:", msg);
-
-        socket.emit("message", `受信した: ${msg}`);
-    });
-
     socket.on("fetch", () => {
+        console.log("Room Info Requested:", ip);
         socket.emit("roomInfo", room);
     });
 
     socket.on("disconnect", () => {
-        console.log("切断:", socket.id);
+        console.log("Disconnected:", socket.id);
     });
 
     socket.on("joinRoom", (displayName: string) => {
         if (room.length < 4) {
-            const uuid: string = crypto.randomUUID();
-            room.push({ displayName: displayName, uuid: uuid })
-
+            const uuid = crypto.randomUUID();
+            updateRoom((r) => r.push({ displayName, userId: uuid, pulse: previousPulse }));
             socket.emit("joined", uuid);
+            userId = uuid;
         }
     });
 
-    const watchedData = new Proxy(room, {
-        set(target, prop, value) {
-            socket.broadcast.emit("roomInfo", room);
-            return true;
-        }
+    socket.on("pulseResponse", (response: { userId: string; newPulse: string }) => {
+        updateRoom((r) => {
+            for (let i = r.length - 1; i >= 0; i--) {
+                if (r[i].userId == userId) {
+                    r[i].pulse = response.newPulse
+                }
+            }
+        });
+        console.log("Pulse response received📡:", response.newPulse, "Current Users", room);
     });
+
 });
 
 httpServer.listen(3001, () => {
