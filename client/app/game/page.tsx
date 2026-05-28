@@ -9,6 +9,11 @@ import { io } from "socket.io-client";
 import UsersView from "@/components/feature/UsersView";
 import { join } from "node:path/win32";
 
+type Word = {
+    jp: string;
+    en: string;
+};
+
 type User = {
     displayName: string;
     userId: string;
@@ -29,6 +34,8 @@ export default function Page() {
     const [room, setRoom] = useState<User[]>([]);
     const [userId, setUserId] = useState("");
     const [cameraAngle, setCameraAngle] = useState(1);
+    const [currentWord, setCurrentWord] = useState<Word | null>(null);
+    const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [displayName, setDisplayName] = useState<string>(() => {
         if (typeof window === "undefined") return "";
         return localStorage.getItem("display-name") ?? "";
@@ -104,10 +111,22 @@ export default function Page() {
             setUserId(myUuid);
         });
 
-        socket.on("isGameStarted", (newIsStarted) => {
-            console.log("Is game started:", newIsStarted);
-            setIsStarted(newIsStarted);
-        });
+        socket.on(
+            "gameStatus",
+            ({
+                isStarted,
+                currentTurn,
+                currentWord,
+            }: {
+                isStarted: boolean;
+                currentTurn: number;
+                currentWord: Word;
+            }) => {
+                setIsStarted(isStarted);
+                setCurrentTurn(currentTurn);
+                setCurrentWord(currentWord);
+            },
+        );
 
         socket.on("pulse", (pulseUuid: string) => {
             console.log(pulseUuid);
@@ -145,7 +164,12 @@ export default function Page() {
     return (
         <div className="flex w-full h-full">
             <div className="w-full flex">
-                <UsersView users={room ?? []} positions={userPositions} />
+                <UsersView
+                    users={room ?? []}
+                    positions={userPositions}
+                    userId={userId}
+                    currentTurn={isStarted ? currentTurn : null}
+                />
             </div>
             <div
                 className={`w-2xl pr-4 gap-4 py-4 h-full justify-end flex flex-col`}
@@ -162,7 +186,23 @@ export default function Page() {
                                     {room.length < 4 ? (
                                         <div className="w-full flex flex-col items-center justify-center gap-8">
                                             {isStarted ? (
-                                                <div></div>
+                                                currentWord == null ? (
+                                                    <div
+                                                        className="font-mono font-bold text-2xl"
+                                                        data-cursor="text"
+                                                    >
+                                                        Game started
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-start">
+                                                        <div
+                                                            className="font-bold text-2xl"
+                                                            data-cursor="text"
+                                                        >
+                                                            {currentWord.jp}
+                                                        </div>
+                                                    </div>
+                                                )
                                             ) : (
                                                 <>
                                                     <div

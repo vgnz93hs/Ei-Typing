@@ -8,9 +8,18 @@ type User = {
     pulse?: string;
 };
 
+type Word = {
+    jp: string;
+    en: string;
+}
+
 let room: User[] = [];
-let isGameStarted = false;
+let isStarted = false;
 let previousPulse: string = "";
+let currentTurn = 0;
+let currentWord: Word | null = null;
+
+const words: Word[] = [{ jp: "ねこ", en: "cat" }, { jp: "りんご", en: "apple" }, { jp: "三毛ねこ", en: "calico cat" }]
 
 const app = express();
 const httpServer = createServer(app);
@@ -23,13 +32,20 @@ const io = new Server(httpServer, {
 
 const broadcastRoomInfo = () => {
     io.emit("roomInfo", room);
-    io.emit("isGameStarted", isGameStarted);
+    io.emit("gameStatus", { isStarted: isStarted, currentTurn: currentTurn, currentWord: currentWord });
+
+    console.log("Room status:", isStarted, currentTurn, currentWord)
 }
 
 const updateRoom = (fn: (room: User[]) => void) => {
     fn(room);
     broadcastRoomInfo();
 }
+
+const endGame = (() => {
+    isStarted = false;
+    currentWord = null;
+})
 
 setInterval(() => {
     updateRoom((r) => {
@@ -38,7 +54,7 @@ setInterval(() => {
                 console.log("user kicked:", previousPulse, "!=", r[i].pulse);
                 r.splice(i, 1);
 
-                isGameStarted = false;
+                endGame();
             }
         }
     });
@@ -63,7 +79,7 @@ io.on("connection", (socket) => {
     socket.on("fetch", () => {
         console.log("Room Info Requested:", ip);
         socket.emit("roomInfo", room);
-        socket.emit("isGameStarted", isGameStarted);
+        socket.emit("isStarted", isStarted);
     });
 
     socket.on("disconnect", () => {
@@ -71,7 +87,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("joinRoom", (displayName: string) => {
-        if (room.length < 4 && !isGameStarted) {
+        if (room.length < 4 && !isStarted) {
             const uuid = crypto.randomUUID();
             updateRoom((r) => r.push({ displayName, userId: uuid, pulse: previousPulse }));
             socket.emit("joined", uuid);
@@ -81,10 +97,16 @@ io.on("connection", (socket) => {
 
     socket.on("startGame", () => {
         if (userId && room.map((user) => user.userId).includes(userId) && room.length < 5 && room.length > 1) {
-            isGameStarted = true;
+            isStarted = true;
             console.log("Game Started 🎮");
 
             broadcastRoomInfo();
+            currentTurn = 0;
+
+            setTimeout(() => {
+                currentWord = words[Math.floor(Math.random() * (words.length))];
+                broadcastRoomInfo();
+            }, 3000);
         }
     })
 
