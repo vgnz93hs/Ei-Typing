@@ -37,6 +37,8 @@ setInterval(() => {
             if (r[i].pulse !== previousPulse) {
                 console.log("user kicked:", previousPulse, "!=", r[i].pulse);
                 r.splice(i, 1);
+
+                isGameStarted = false;
             }
         }
     });
@@ -69,7 +71,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("joinRoom", (displayName: string) => {
-        if (room.length < 4) {
+        if (room.length < 4 && !isGameStarted) {
             const uuid = crypto.randomUUID();
             updateRoom((r) => r.push({ displayName, userId: uuid, pulse: previousPulse }));
             socket.emit("joined", uuid);

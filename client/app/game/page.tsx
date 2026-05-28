@@ -161,30 +161,42 @@ export default function Page() {
                                 <div className="flex h-full">
                                     {room.length < 4 ? (
                                         <div className="w-full flex flex-col items-center justify-center gap-8">
-                                            <div
-                                                className="gradient-text h-fit px-2 py-1 font-bold flex"
-                                                data-cursor="text"
-                                            >
-                                                Waiting for other players…
-                                            </div>
-                                            <div
-                                                className="rounded-lg w-48 flex"
-                                                data-cursor="button"
-                                                data-cursor-shape={
-                                                    room.length < 2 ? "2" : "0"
-                                                }
-                                            >
-                                                <button
-                                                    className={`items-center font-bold ${room.length < 2 ? "opacity-50" : "active:scale-95"} bg-cyan-600 disabled:opacity-50 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out`}
-                                                    onClick={() => {
-                                                        if (room.length > 1) {
-                                                            handleStartGame();
+                                            {isStarted ? (
+                                                <div></div>
+                                            ) : (
+                                                <>
+                                                    <div
+                                                        className="gradient-text h-fit px-2 py-1 font-bold flex"
+                                                        data-cursor="text"
+                                                    >
+                                                        Waiting for other
+                                                        players…
+                                                    </div>
+                                                    <div
+                                                        className="rounded-lg w-48 flex"
+                                                        data-cursor="button"
+                                                        data-cursor-shape={
+                                                            room.length < 2
+                                                                ? "2"
+                                                                : "0"
                                                         }
-                                                    }}
-                                                >
-                                                    Start Game
-                                                </button>
-                                            </div>
+                                                    >
+                                                        <button
+                                                            className={`items-center font-bold ${room.length < 2 ? "opacity-50" : "active:scale-95"} bg-cyan-600 disabled:opacity-50 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out`}
+                                                            onClick={() => {
+                                                                if (
+                                                                    room.length >
+                                                                    1
+                                                                ) {
+                                                                    handleStartGame();
+                                                                }
+                                                            }}
+                                                        >
+                                                            Start Game
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     ) : (
                                         <div></div>
@@ -207,53 +219,64 @@ export default function Page() {
                         ) : (
                             <div className="h-full w-full flex items-center">
                                 {room.length < 4 ? (
-                                    <>
-                                        <div className="w-full">
-                                            <div
-                                                className="w-fit pl-4 font-bold"
-                                                data-cursor="text"
-                                            >
-                                                Connected
-                                            </div>
+                                    isStarted ? (
+                                        <div
+                                            className="font-mono opacity-50 w-fit pl-4 font-bold"
+                                            data-cursor="text"
+                                        >
+                                            Game has already started
                                         </div>
-                                        <div className="flex gap-2">
-                                            <div
-                                                className="rounded-lg w-32 flex"
-                                                data-cursor="button"
-                                                data-cursor-shape="1"
-                                            >
-                                                <button
-                                                    className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                    onClick={() =>
-                                                        handleWatch()
-                                                    }
+                                    ) : (
+                                        <>
+                                            <div className="w-full">
+                                                <div
+                                                    className="w-fit pl-4 font-bold"
+                                                    data-cursor="text"
                                                 >
-                                                    Watch Only
-                                                </button>
+                                                    Connected
+                                                </div>
                                             </div>
-                                            <div
-                                                className="rounded-lg w-24 flex"
-                                                data-cursor="button"
-                                                data-cursor-shape="0"
-                                            >
-                                                <button
-                                                    disabled={room.length >= 4}
-                                                    className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                    onClick={() =>
-                                                        handleConnect()
-                                                    }
+                                            <div className="flex gap-2">
+                                                <div
+                                                    className="rounded-lg w-32 flex"
+                                                    data-cursor="button"
+                                                    data-cursor-shape="1"
                                                 >
-                                                    Join
-                                                </button>
+                                                    <button
+                                                        className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                        onClick={() =>
+                                                            handleWatch()
+                                                        }
+                                                    >
+                                                        Watch Only
+                                                    </button>
+                                                </div>
+                                                <div
+                                                    className="rounded-lg w-24 flex"
+                                                    data-cursor="button"
+                                                    data-cursor-shape="0"
+                                                >
+                                                    <button
+                                                        disabled={
+                                                            room.length >= 4
+                                                        }
+                                                        className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                        onClick={() =>
+                                                            handleConnect()
+                                                        }
+                                                    >
+                                                        Join
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
+                                        </>
+                                    )
                                 ) : (
                                     <div
                                         className="font-mono opacity-50 w-fit pl-4 font-bold"
                                         data-cursor="text"
                                     >
-                                        This Room is Full
+                                        This room is full
                                     </div>
                                 )}
                             </div>
@@ -264,7 +287,7 @@ export default function Page() {
                                 className="w-fit pl-4 font-bold gradient-text"
                                 data-cursor="text"
                             >
-                                Connecting to Server…
+                                Connecting to server…
                             </div>
                         </div>
                     )}
