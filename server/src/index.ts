@@ -9,6 +9,7 @@ type User = {
 };
 
 let room: User[] = [];
+let isGameStarted = false;
 let previousPulse: string = "";
 
 const app = express();
@@ -20,9 +21,14 @@ const io = new Server(httpServer, {
     },
 });
 
-function updateRoom(fn: (room: User[]) => void) {
-    fn(room);
+const broadcastRoomInfo = () => {
     io.emit("roomInfo", room);
+    io.emit("isGameStarted", isGameStarted);
+}
+
+const updateRoom = (fn: (room: User[]) => void) => {
+    fn(room);
+    broadcastRoomInfo();
 }
 
 setInterval(() => {
@@ -55,6 +61,7 @@ io.on("connection", (socket) => {
     socket.on("fetch", () => {
         console.log("Room Info Requested:", ip);
         socket.emit("roomInfo", room);
+        socket.emit("isGameStarted", isGameStarted);
     });
 
     socket.on("disconnect", () => {
@@ -69,6 +76,15 @@ io.on("connection", (socket) => {
             userId = uuid;
         }
     });
+
+    socket.on("startGame", () => {
+        if (userId && room.map((user) => user.userId).includes(userId) && room.length < 5 && room.length > 1) {
+            isGameStarted = true;
+            console.log("Game Started 🎮");
+
+            broadcastRoomInfo();
+        }
+    })
 
     socket.on("pulseResponse", (response: { userId: string; newPulse: string }) => {
         updateRoom((r) => {

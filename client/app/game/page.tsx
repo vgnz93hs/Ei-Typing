@@ -34,6 +34,7 @@ export default function Page() {
         return localStorage.getItem("display-name") ?? "";
     });
     const socketRef = useRef<ReturnType<typeof io> | null>(null);
+    const [isStarted, setIsStarted] = useState<boolean>(false);
     const router = useRouter();
     const [isSpectator, setIsSpectator] = useState<boolean>(false);
     const [userPositions, setUserPositions] = useState<Position[]>(
@@ -103,6 +104,11 @@ export default function Page() {
             setUserId(myUuid);
         });
 
+        socket.on("isGameStarted", (newIsStarted) => {
+            console.log("Is game started:", newIsStarted);
+            setIsStarted(newIsStarted);
+        });
+
         socket.on("pulse", (pulseUuid: string) => {
             console.log(pulseUuid);
 
@@ -130,6 +136,10 @@ export default function Page() {
 
     const handleWatch = () => {
         setIsSpectator(true);
+    };
+
+    const handleStartGame = () => {
+        socketRef.current?.emit("startGame");
     };
 
     return (
@@ -160,14 +170,17 @@ export default function Page() {
                                             <div
                                                 className="rounded-lg w-48 flex"
                                                 data-cursor="button"
-                                                data-cursor-shape="0"
+                                                data-cursor-shape={
+                                                    room.length < 2 ? "2" : "0"
+                                                }
                                             >
                                                 <button
-                                                    disabled={room.length >= 4}
-                                                    className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                    onClick={() =>
-                                                        handleConnect()
-                                                    }
+                                                    className={`items-center font-bold ${room.length < 2 ? "opacity-50" : "active:scale-95"} bg-cyan-600 disabled:opacity-50 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out`}
+                                                    onClick={() => {
+                                                        if (room.length > 1) {
+                                                            handleStartGame();
+                                                        }
+                                                    }}
                                                 >
                                                     Start Game
                                                 </button>
