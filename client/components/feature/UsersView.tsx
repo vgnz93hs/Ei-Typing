@@ -37,10 +37,8 @@ export default function UsersView({
                             left: `calc(${positions[index].x + 50}% - ${positions[index].w / 2}px)`,
                             top: `calc(${positions[index].y + 50}% - ${positions[index].h / 2}px)`,
                         }}
-                        data-cursor="button"
-                        data-cursor-shape="0"
                     >
-                        <div className="bg-(--color-foreground) w-full h-full flex rounded-full relative active:scale-95 transition-transform duration-200 ease-out">
+                        <div className="bg-(--color-foreground) w-full h-full flex rounded-full relative transition-transform duration-200 ease-out">
                             <div
                                 className="absolute flex-col pointer-events-none rounded-full transition-all duration-500 ease-[cubic-bezier(0.1,0.5,0,1)] text-center items-center text-sm pb-2 w-32 flex justify-center"
                                 style={{
@@ -66,20 +64,16 @@ export default function UsersView({
                     </div>
                 ))}
 
-                {currentTurn !== null && (
-                    <div
-                        className="absolute flex transition-all duration-500 w-4 h-4 ease-[cubic-bezier(0.1,0.5,0,1)] rounded-full"
-                        style={{
-                            opacity: `${positions[currentTurn].opacity}`,
-                            left: `calc(${positions[currentTurn].x + 50}% - ${positions[currentTurn].w / 2 + 4}px)`,
-                            top: `calc(${positions[currentTurn].y + 50}% - ${positions[currentTurn].h / 2 + 4}px)`,
-                        }}
-                        data-cursor="button"
-                        data-cursor-shape="0"
-                    >
-                        <div className="bg-red-500 w-full h-full flex rounded-full relative active:scale-95 transition-transform duration-200 ease-out"></div>
-                    </div>
-                )}
+                <div
+                    className="absolute flex transition-all duration-500 w-4 h-4 ease-[cubic-bezier(0.1,0.5,0,1)] rounded-full"
+                    style={{
+                        opacity: `${currentTurn !== null ? 1 : 0}`,
+                        left: `calc(${currentTurn !== null ? positions[currentTurn].x + 50 : 50}% - ${currentTurn !== null ? positions[currentTurn].w / 2 + 4 : 8}px)`,
+                        top: `calc(${currentTurn !== null ? positions[currentTurn].y + 50 : 50}% - ${currentTurn !== null ? positions[currentTurn].h / 2 + 4 : 8}px)`,
+                    }}
+                >
+                    <div className="bg-red-500 w-full h-full flex rounded-full relative active:scale-95 transition-transform duration-200 ease-out"></div>
+                </div>
             </div>
         </div>
     );

@@ -8,6 +8,7 @@ import { Keys } from "@/components/ui/Keys";
 import { io } from "socket.io-client";
 import UsersView from "@/components/feature/UsersView";
 import { join } from "node:path/win32";
+import TypingView from "@/components/feature/InputView";
 
 type Word = {
     jp: string;
@@ -175,7 +176,7 @@ export default function Page() {
                 className={`w-2xl pr-4 gap-4 py-4 h-full justify-end flex flex-col`}
             >
                 <div
-                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${isSpectator ? "opacity-0 scale-95 h-14" : room.some((user) => user.userId === userId) ? "h-full" : isConnected ? "h-14" : "h-14"} rounded-2xl p-2 w-full`}
+                    className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${isSpectator ? "opacity-0 scale-95 h-14" : room.some((user) => user.userId === userId) ? (isStarted ? "h-full" : "h-96") : isConnected ? "h-14" : "h-14"} rounded-2xl p-2 w-full`}
                 >
                     {isConnected ? (
                         isSpectator ? (
@@ -183,64 +184,68 @@ export default function Page() {
                         ) : room.some((user) => user.userId === userId) ? (
                             <div className="flex flex-col h-full">
                                 <div className="flex h-full">
-                                    {room.length < 4 ? (
-                                        <div className="w-full flex flex-col items-center justify-center gap-8">
-                                            {isStarted ? (
-                                                currentWord == null ? (
-                                                    <div
-                                                        className="font-mono font-bold text-2xl"
-                                                        data-cursor="text"
-                                                    >
-                                                        Game started
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex flex-col items-start">
+                                    <div className="w-full flex flex-col items-center justify-center gap-8">
+                                        {isStarted ? (
+                                            currentWord == null ? (
+                                                <div
+                                                    className="font-mono font-bold text-2xl"
+                                                    data-cursor="text"
+                                                >
+                                                    Game started
+                                                </div>
+                                            ) : (
+                                                <div className="flex h-full flex-col gap-2 w-full">
+                                                    {room[currentTurn]
+                                                        ?.userId == userId && (
                                                         <div
-                                                            className="font-bold text-2xl"
+                                                            className="font-bold px-2 pt-1 pb-1 w-fit flex"
                                                             data-cursor="text"
                                                         >
-                                                            {currentWord.jp}
+                                                            YOUR TURN
                                                         </div>
-                                                    </div>
-                                                )
-                                            ) : (
-                                                <>
-                                                    <div
-                                                        className="gradient-text h-fit px-2 py-1 font-bold flex"
-                                                        data-cursor="text"
-                                                    >
-                                                        Waiting for other
-                                                        players…
-                                                    </div>
-                                                    <div
-                                                        className="rounded-lg w-48 flex"
-                                                        data-cursor="button"
-                                                        data-cursor-shape={
-                                                            room.length < 2
-                                                                ? "2"
-                                                                : "0"
+                                                    )}
+
+                                                    <TypingView
+                                                        japanese={
+                                                            currentWord.jp
                                                         }
+                                                        english={currentWord.en}
+                                                    />
+                                                </div>
+                                            )
+                                        ) : (
+                                            <>
+                                                <div
+                                                    className="gradient-text h-fit px-2 py-1 font-bold flex"
+                                                    data-cursor="text"
+                                                >
+                                                    Waiting for other players…
+                                                </div>
+                                                <div
+                                                    className="rounded-lg w-48 flex"
+                                                    data-cursor="button"
+                                                    data-cursor-shape={
+                                                        room.length < 2
+                                                            ? "2"
+                                                            : "0"
+                                                    }
+                                                >
+                                                    <button
+                                                        className={`items-center font-bold ${room.length < 2 ? "opacity-50" : "active:scale-95"} bg-cyan-600 disabled:opacity-50 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out`}
+                                                        onClick={() => {
+                                                            if (
+                                                                room.length > 1
+                                                            ) {
+                                                                handleStartGame();
+                                                            }
+                                                        }}
                                                     >
-                                                        <button
-                                                            className={`items-center font-bold ${room.length < 2 ? "opacity-50" : "active:scale-95"} bg-cyan-600 disabled:opacity-50 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out`}
-                                                            onClick={() => {
-                                                                if (
-                                                                    room.length >
-                                                                    1
-                                                                ) {
-                                                                    handleStartGame();
-                                                                }
-                                                            }}
-                                                        >
-                                                            Start Game
-                                                        </button>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div></div>
-                                    )}
+                                                        Start Game
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="px-2">
                                     <div className="flex flex-col gap-2 pb-1 pt-3 border-t border-(--color-border)">
