@@ -1,5 +1,6 @@
 import express from "express";
 import { createServer } from "http";
+import { start } from "repl";
 import { Server } from "socket.io";
 
 type User = {
@@ -34,7 +35,7 @@ const broadcastRoomInfo = () => {
     io.emit("roomInfo", room);
     io.emit("gameStatus", { isStarted: isStarted, currentTurn: currentTurn, currentWord: currentWord });
 
-    console.log("Room status:", isStarted, currentTurn, currentWord)
+    console.log("Room status:", isStarted, currentTurn, currentWord);
 }
 
 const updateRoom = (fn: (room: User[]) => void) => {
@@ -45,7 +46,21 @@ const updateRoom = (fn: (room: User[]) => void) => {
 const endGame = (() => {
     isStarted = false;
     currentWord = null;
+    currentTurn = 0;
 })
+
+const startGame = () => {
+    isStarted = true;
+    console.log("Game Started 🎮");
+
+    broadcastRoomInfo();
+    currentTurn = 0;
+
+    setTimeout(() => {
+        currentWord = words[2];
+        broadcastRoomInfo();
+    }, 3000);
+}
 
 setInterval(() => {
     updateRoom((r) => {
@@ -54,7 +69,10 @@ setInterval(() => {
                 console.log("user kicked:", previousPulse, "!=", r[i].pulse);
                 r.splice(i, 1);
 
-                endGame();
+                if (isStarted) {
+                    endGame();
+                    room = [];
+                }
             }
         }
     });
@@ -92,21 +110,30 @@ io.on("connection", (socket) => {
             updateRoom((r) => r.push({ displayName, userId: uuid, pulse: previousPulse }));
             socket.emit("joined", uuid);
             userId = uuid;
+
+            if (room.length == 4) {
+                startGame();
+            }
         }
     });
 
-    socket.on("startGame", () => {
-        if (userId && room.map((user) => user.userId).includes(userId) && room.length < 5 && room.length > 1) {
-            isStarted = true;
-            console.log("Game Started 🎮");
+    socket.on("success", () => {
+        console.log("success 💻");
+
+        if (userId == room[currentTurn].userId) {
+            if (currentTurn == room.length - 1) {
+                currentTurn = 0;
+            } else {
+                currentTurn += 1;
+            }
 
             broadcastRoomInfo();
-            currentTurn = 0;
+        }
+    })
 
-            setTimeout(() => {
-                currentWord = words[Math.floor(Math.random() * (words.length))];
-                broadcastRoomInfo();
-            }, 3000);
+    socket.on("startGame", () => {
+        if (userId && room.map((user) => user.userId).includes(userId) && room.length < 5 && room.length > 1 && !isStarted) {
+            startGame();
         }
     })
 
