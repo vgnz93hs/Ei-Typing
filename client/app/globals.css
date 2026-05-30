@@ -127,6 +127,27 @@ body {
     }
 }
 
+@keyframes wrongAnswer {
+    0% {
+        transform: translateX(-10);
+    }
+    15% {
+        transform: translateX(10);
+    }
+    30% {
+        transform: translateX(-10);
+    }
+    45% {
+        transform: translateX(10);
+    }
+    60% {
+        transform: translateX(-10);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
 @keyframes resultAnimation {
     0% {
         transform: scale(0.75);

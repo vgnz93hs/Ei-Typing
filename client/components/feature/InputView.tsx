@@ -89,7 +89,7 @@ export default function TypingView({
                 <div
                     className={`w-fit rounded-lg border border-(--color-border) p-1 overflow-clip gap-y-3 flex-wrap flex justify-start ${
                         isFailAnimating
-                            ? "animate-[bombBounce_400ms_ease-out]"
+                            ? "animate-[wrongAnswer_400ms_ease-out]"
                             : ""
                     }`}
                 >
