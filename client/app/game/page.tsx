@@ -59,10 +59,10 @@ export default function Page() {
     );
 
     useEffect(() => {
-        const url = localStorage.getItem("server-url") as string;
+        const url = localStorage.getItem("server-url") ?? "";
 
         const socket = io(
-            url == "" || typeof window === "undefined"
+            typeof window === "undefined" || url === ""
                 ? "https://ei-typing.onrender.com"
                 : url,
         );
