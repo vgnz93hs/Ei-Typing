@@ -41,6 +41,7 @@ export default function Page() {
         if (typeof window === "undefined") return "";
         return localStorage.getItem("display-name") ?? "";
     });
+    const [bombStatus, setBombStatus] = useState<number>(0);
     const socketRef = useRef<ReturnType<typeof io> | null>(null);
     const [isStarted, setIsStarted] = useState<boolean>(false);
     const router = useRouter();
@@ -121,14 +122,17 @@ export default function Page() {
                 isStarted,
                 currentTurn,
                 currentWord,
+                bombStatus,
             }: {
                 isStarted: boolean;
                 currentTurn: number;
                 currentWord: Word;
+                bombStatus: number;
             }) => {
                 setIsStarted(isStarted);
                 setCurrentTurn(currentTurn);
                 setCurrentWord(currentWord);
+                setBombStatus(bombStatus);
             },
         );
 
@@ -173,6 +177,7 @@ export default function Page() {
                     positions={userPositions}
                     userId={userId}
                     currentTurn={isStarted ? currentTurn : null}
+                    bombStatus={bombStatus}
                 />
             </div>
             <div
