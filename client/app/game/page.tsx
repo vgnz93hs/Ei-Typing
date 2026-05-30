@@ -112,6 +112,10 @@ export default function Page() {
             );
         });
 
+        socket.on("bombExplosioned", (myUuid) => {
+            setUserId(myUuid);
+        });
+
         socket.on("joined", (myUuid) => {
             setUserId(myUuid);
         });
