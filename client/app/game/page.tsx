@@ -60,7 +60,13 @@ export default function Page() {
 
     useEffect(() => {
         const url = localStorage.getItem("server-url") as string;
-        const socket = io(url == "" ? "https://ei-typing.onrender.com" : url);
+        if (typeof window !== "undefined") {
+            const socket = io(
+                url == "" ? "https://ei-typing.onrender.com" : url,
+            );
+        } else {
+            const socket = io("https://ei-typing.onrender.com");
+        }
 
         console.log(url);
         socketRef.current = socket;
