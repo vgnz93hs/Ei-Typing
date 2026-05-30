@@ -18,7 +18,9 @@ let room: User[] = [];
 let isStarted = false;
 let previousPulse: string = "";
 let currentTurn = 0;
+let bombTimer: NodeJS.Timeout | null = null;
 let currentWord: Word | null = null;
+let bombStatus: number = 0;
 
 const words: Word[] = [{ jp: "ねこ", en: "cat" }, { jp: "りんご", en: "apple" }, { jp: "三毛ねこ", en: "calico cat" }]
 
@@ -33,9 +35,9 @@ const io = new Server(httpServer, {
 
 const broadcastRoomInfo = () => {
     io.emit("roomInfo", room);
-    io.emit("gameStatus", { isStarted: isStarted, currentTurn: currentTurn, currentWord: currentWord });
+    io.emit("gameStatus", { isStarted: isStarted, currentTurn: currentTurn, currentWord: currentWord, bombStatus: bombStatus });
 
-    console.log("Room status:", isStarted, currentTurn, currentWord);
+    console.log("Room status:", isStarted, currentTurn, currentWord, bombStatus);
 }
 
 const updateRoom = (fn: (room: User[]) => void) => {
@@ -47,18 +49,23 @@ const endGame = (() => {
     isStarted = false;
     currentWord = null;
     currentTurn = 0;
+    bombStatus = 0;
 })
 
 const startGame = () => {
     isStarted = true;
     console.log("Game Started 🎮");
 
+    bombStatus = 0;
+
     broadcastRoomInfo();
     currentTurn = 0;
 
     setTimeout(() => {
-        const currentWord = words[Math.floor(Math.random() * words.length)];
+        currentWord = words[Math.floor(Math.random() * words.length)];
         broadcastRoomInfo();
+
+        console.log("Word Changed");
     }, 3000);
 }
 
@@ -126,6 +133,7 @@ io.on("connection", (socket) => {
             } else {
                 currentTurn += 1;
             }
+            currentWord = words[Math.floor(Math.random() * words.length)];
 
             broadcastRoomInfo();
         }
