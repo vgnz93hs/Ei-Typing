@@ -44,7 +44,7 @@ export default function Settings() {
                 <button
                     className="bg-cyan-600"
                     data-cursor="button"
-                    data-cursor-shape="2"
+                    data-cursor-shape="0"
                     onClick={() => {
                         setServerUrl("");
                         handleSave("", displayName);
@@ -69,7 +69,7 @@ export default function Settings() {
             <button
                 className="bg-cyan-600"
                 data-cursor="button"
-                data-cursor-shape="2"
+                data-cursor-shape="0"
                 onClick={() => router.push("/")}
             >
                 Home

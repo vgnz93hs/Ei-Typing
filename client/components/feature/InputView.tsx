@@ -67,6 +67,7 @@ export default function TypingView({
                 setInput(Array(english.length).fill(""));
                 setCurrentSelection(0);
                 triggerFailAnimation();
+                onChangeInput("");
             }
         }
     };
