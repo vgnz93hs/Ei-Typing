@@ -56,7 +56,10 @@ export default function Page() {
     );
 
     useEffect(() => {
-        const socket = io("http://localhost:3001");
+        const url = localStorage.getItem("server-url") as string;
+        const socket = io(url == "" ? "http://localhost:3001" : url);
+
+        console.log(url);
         socketRef.current = socket;
 
         const intervalId = setInterval(() => {

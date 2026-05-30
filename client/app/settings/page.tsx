@@ -47,7 +47,7 @@ export default function Settings() {
                     data-cursor-shape="2"
                     onClick={() => {
                         setServerUrl("");
-                        handleSave(serverUrl, displayName);
+                        handleSave("", displayName);
                     }}
                 >
                     Use Default

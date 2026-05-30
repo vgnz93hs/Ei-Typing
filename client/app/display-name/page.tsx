@@ -56,13 +56,13 @@ export default function Loading() {
             <div
                 className="rounded-lg w-48 flex"
                 data-cursor="button"
-                data-cursor-shape="0"
+                data-cursor-shape={!!displayName ? "0" : "2"}
             >
                 <button
-                    data-cursor="button"
-                    className="text-lg items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white flex transition-all duration-200 ease-out active:scale-95"
-                    data-cursor-shape="0"
-                    onClick={handleContinue}
+                    className={`text-lg ${!displayName ? "opacity-50" : "active:scale-95"} items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white flex transition-all duration-200 ease-out`}
+                    onClick={() => {
+                        if (displayName) handleContinue();
+                    }}
                 >
                     <div className="mr-1">Continue</div>
                     <Keys keys={["C"]} />
