@@ -204,7 +204,7 @@ export default function Page() {
                         data-cursor="text"
                         className="font-bold text-4xl animate-[resultAnimation_1000ms_cubic-bezier(0.1,0.5,0,1)]"
                     >
-                        {result === false ? "You Survived" : "You Exploded"}
+                        {result === false ? "You Survived" : "You Lose"}
                     </div>
                 </div>
             )}
