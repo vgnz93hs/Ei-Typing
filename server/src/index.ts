@@ -1,6 +1,5 @@
 import express from "express";
 import { createServer } from "http";
-import { start } from "repl";
 import { Server } from "socket.io";
 
 type User = {
@@ -42,6 +41,7 @@ const bombExplosioned = () => {
     currentTurn = 0;
     currentWord = null;
     bombStatus = 0;
+    room = [];
 
     if (bombTimer) {
         clearTimeout(bombTimer);
@@ -159,13 +159,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("joinRoom", (displayName: string) => {
-        if (room.length < 4 && !isStarted) {
+        if (room.length < 6 && !isStarted) {
             const uuid = crypto.randomUUID();
             updateRoom((r) => r.push({ displayName, userId: uuid, pulse: previousPulse }));
             socket.emit("joined", uuid);
             userId = uuid;
 
-            if (room.length == 4) {
+            if (room.length == 6) {
                 startGame();
             }
         }
@@ -187,7 +187,7 @@ io.on("connection", (socket) => {
     })
 
     socket.on("startGame", () => {
-        if (userId && room.map((user) => user.userId).includes(userId) && room.length < 5 && room.length > 1 && !isStarted) {
+        if (userId && room.map((user) => user.userId).includes(userId) && room.length <= 6 && room.length > 1 && !isStarted) {
             startGame();
         }
     })

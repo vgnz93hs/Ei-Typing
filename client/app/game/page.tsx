@@ -321,7 +321,7 @@ export default function Page() {
                             </div>
                         ) : (
                             <div className="h-full w-full flex items-center">
-                                {room.length < 4 ? (
+                                {room.length < 6 ? (
                                     isStarted ? (
                                         <div
                                             className="font-mono opacity-50 w-fit pl-4 font-bold"
