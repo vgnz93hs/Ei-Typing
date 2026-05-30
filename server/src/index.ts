@@ -210,6 +210,7 @@ io.on("connection", (socket) => {
             } else {
                 currentTurn += 1;
             }
+            currentInput = "";
             currentWord = words[Math.floor(Math.random() * words.length)];
 
             broadcastRoomInfo();
