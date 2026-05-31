@@ -58,6 +58,8 @@ export default function Page() {
         })),
     );
 
+    const currentTurnUser = room[currentTurn] as User | undefined;
+
     useEffect(() => {
         const url = localStorage.getItem("server-url") ?? "";
 
@@ -222,23 +224,21 @@ export default function Page() {
             >
                 <div
                     className={`flex flex-col bg-(--color-background-secondary) transition-all duration-200 ease-[cubic-bezier(0.1,0.5,0,1)] ${
-                        isSpectator
-                            ? "opacity-0 scale-95 h-14"
+                        isSpectator && !isStarted
+                            ? "opacity-0 scale-95"
                             : room.some((user) => user.userId === userId)
                               ? isStarted
-                                  ? room[currentTurn]?.userId == userId
+                                  ? currentTurnUser?.userId == userId
                                       ? "h-full"
                                       : "h-64"
                                   : "h-48"
-                              : isConnected
-                                ? "h-14"
+                              : isStarted
+                                ? "h-64"
                                 : "h-14"
                     } rounded-2xl p-2 w-full`}
                 >
                     {isConnected ? (
-                        isSpectator ? (
-                            <div className="w-full h-full flex items-center"></div>
-                        ) : room.some((user) => user.userId === userId) ? (
+                        room.some((user) => user.userId === userId) ? (
                             <div className="flex flex-col h-full">
                                 <div className="flex h-full">
                                     <div className="w-full flex flex-col items-center justify-center gap-4">
@@ -252,8 +252,8 @@ export default function Page() {
                                                 </div>
                                             ) : (
                                                 <div className="flex h-full items-center justify-center flex-col gap-2 w-full">
-                                                    {room[currentTurn]
-                                                        ?.userId == userId ? (
+                                                    {currentTurnUser?.userId ==
+                                                    userId ? (
                                                         <>
                                                             <div
                                                                 className="font-bold text-xl px-2 pt-1 pb-1 w-fit flex"
@@ -262,16 +262,15 @@ export default function Page() {
                                                                 YOUR TURN
                                                             </div>
                                                         </>
-                                                    ) : (
+                                                    ) : currentTurnUser ? (
                                                         <div
                                                             className="font-bold text-xl px-2 pt-1 pb-1 w-fit flex"
                                                             data-cursor="text"
                                                         >
-                                                            {room[currentTurn]
-                                                                .displayName +
+                                                            {currentTurnUser.displayName +
                                                                 "'s Turn"}
                                                         </div>
-                                                    )}
+                                                    ) : null}
 
                                                     <TypingView
                                                         japanese={
@@ -291,9 +290,7 @@ export default function Page() {
                                                         ) => {
                                                             if (
                                                                 userId ==
-                                                                room[
-                                                                    currentTurn
-                                                                ].userId
+                                                                currentTurnUser?.userId
                                                             ) {
                                                                 socketRef.current?.emit(
                                                                     "cuttentInput",
@@ -303,8 +300,7 @@ export default function Page() {
                                                         }}
                                                         currentInput={
                                                             userId ==
-                                                            room[currentTurn]
-                                                                .userId
+                                                            currentTurnUser?.userId
                                                                 ? null
                                                                 : currentInput
                                                         }
@@ -350,53 +346,109 @@ export default function Page() {
                             <div className="h-full w-full flex items-center">
                                 {room.length < 6 ? (
                                     isStarted ? (
-                                        <div
-                                            className="font-mono opacity-50 w-fit pl-4 font-bold"
-                                            data-cursor="text"
-                                        >
-                                            Game has already started
-                                        </div>
+                                        currentWord == null ? (
+                                            <div
+                                                className="font-mono font-bold text-2xl"
+                                                data-cursor="text"
+                                            >
+                                                Game started
+                                            </div>
+                                        ) : (
+                                            <div className="flex h-full items-center justify-center flex-col gap-2 w-full">
+                                                {currentTurnUser?.userId ==
+                                                userId ? (
+                                                    <>
+                                                        <div
+                                                            className="font-bold text-xl px-2 pt-1 pb-1 w-fit flex"
+                                                            data-cursor="text"
+                                                        >
+                                                            YOUR TURN
+                                                        </div>
+                                                    </>
+                                                ) : currentTurnUser ? (
+                                                    <div
+                                                        className="font-bold text-xl px-2 pt-1 pb-1 w-fit flex"
+                                                        data-cursor="text"
+                                                    >
+                                                        {currentTurnUser.displayName +
+                                                            "'s Turn"}
+                                                    </div>
+                                                ) : null}
+
+                                                <TypingView
+                                                    japanese={currentWord.jp}
+                                                    english={currentWord.en}
+                                                    onSuccess={() => {
+                                                        console.log(
+                                                            "Success! Emitting to server...",
+                                                        );
+                                                        socketRef.current?.emit(
+                                                            "success",
+                                                        );
+                                                    }}
+                                                    onChangeInput={(input) => {
+                                                        if (
+                                                            userId ==
+                                                            currentTurnUser?.userId
+                                                        ) {
+                                                            socketRef.current?.emit(
+                                                                "cuttentInput",
+                                                                input,
+                                                            );
+                                                        }
+                                                    }}
+                                                    currentInput={
+                                                        userId ==
+                                                        currentTurnUser?.userId
+                                                            ? null
+                                                            : currentInput
+                                                    }
+                                                />
+                                            </div>
+                                        )
                                     ) : (
-                                        <>
-                                            <div className="w-full">
-                                                <div
-                                                    className="w-fit pl-4 font-bold"
-                                                    data-cursor="text"
-                                                >
-                                                    Connected
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <div
-                                                    className="rounded-lg w-32 flex"
-                                                    data-cursor="button"
-                                                    data-cursor-shape="1"
-                                                >
-                                                    <button
-                                                        className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                        onClick={() =>
-                                                            handleWatch()
-                                                        }
+                                        !isSpectator && (
+                                            <>
+                                                <div className="w-full">
+                                                    <div
+                                                        className="w-fit pl-4 font-bold"
+                                                        data-cursor="text"
                                                     >
-                                                        Watch Only
-                                                    </button>
+                                                        Connected
+                                                    </div>
                                                 </div>
-                                                <div
-                                                    className="rounded-lg w-24 flex"
-                                                    data-cursor="button"
-                                                    data-cursor-shape="0"
-                                                >
-                                                    <button
-                                                        className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
-                                                        onClick={() =>
-                                                            handleConnect()
-                                                        }
+                                                <div className="flex gap-2">
+                                                    <div
+                                                        className="rounded-lg w-32 flex"
+                                                        data-cursor="button"
+                                                        data-cursor-shape="1"
                                                     >
-                                                        Join
-                                                    </button>
+                                                        <button
+                                                            className="items-center text-center justify-center font-bold py-2 w-full text-cyan-600 h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                            onClick={() =>
+                                                                handleWatch()
+                                                            }
+                                                        >
+                                                            Watch Only
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        className="rounded-lg w-24 flex"
+                                                        data-cursor="button"
+                                                        data-cursor-shape="0"
+                                                    >
+                                                        <button
+                                                            className="items-center font-bold bg-cyan-600 w-full justify-center py-2 rounded-lg text-white h-fit flex transition-all duration-200 ease-out active:scale-95"
+                                                            onClick={() =>
+                                                                handleConnect()
+                                                            }
+                                                        >
+                                                            Join
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </>
+                                            </>
+                                        )
                                     )
                                 ) : (
                                     <div
